@@ -88,14 +88,14 @@ body {
 
 .top-section {
     background: #000;
-    padding: 40px 20px 30px;
+    padding: 40px 20px 20px;
     display: flex;
     flex-direction: column;
     overscroll-behavior: none;
     overscroll-behavior-y: none;
-    flex: 1;
+    flex: 0 0 auto;
     min-height: 0;
-    max-height: 400px;
+    max-height: 150px;
     overflow-y: auto;
 }
 
@@ -104,6 +104,8 @@ body {
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 30px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .date-info {
@@ -183,6 +185,11 @@ body {
     flex: 1;
     cursor: pointer;
     touch-action: none;
+    display: none; /* Hide graph on main page */
+}
+
+.day-graph-container {
+    display: none; /* Hide graph on main page */
 }
 
 .graph-wrapper {
@@ -246,7 +253,7 @@ body {
 }
 
 .workout-name {
-    font-size: 26px;
+    font-size: 32px;
     font-weight: bold;
     color: #808080;
     flex: 1;
@@ -257,40 +264,44 @@ body {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    min-width: 100px;
-    height: 24px;
+    min-width: 150px;
+    height: 32px;
     flex-shrink: 0;
+    padding: 10px 0;
+    cursor: pointer;
 }
 
 .workout-input {
     position: absolute;
     opacity: 0;
     pointer-events: none;
-    width: 100px;
-    height: 24px;
+    width: 150px;
+    height: 52px;
     border: none;
     background: transparent;
-    font-size: 24px;
+    font-size: 32px;
     font-weight: bold;
     color: #000;
     text-align: right;
-    padding: 0;
+    padding: 10px 0;
     margin: 0;
     outline: none;
     right: 0;
-    top: 0;
+    top: -10px;
+    cursor: pointer;
 }
 
 .workout-input.active {
     position: absolute;
     opacity: 1;
     pointer-events: auto;
-    width: 100px;
-    height: 24px;
+    width: 150px;
+    height: 52px;
     z-index: 20;
     background: #fff;
     right: 0;
-    top: 0;
+    top: -10px;
+    cursor: pointer;
 }
 
 .workout-card:has(.workout-input.active) .workout-value {
@@ -298,16 +309,19 @@ body {
 }
 
 .workout-value {
-    font-size: 24px;
+    font-size: 32px;
     font-weight: bold;
     color: #000;
     text-align: right;
     position: absolute;
     right: 0;
-    top: 0;
+    top: -10px;
     z-index: 2;
-    height: 24px;
-    line-height: 24px;
+    height: 52px;
+    line-height: 52px;
+    padding: 10px 0;
+    cursor: pointer;
+    min-width: 150px;
 }
 
 

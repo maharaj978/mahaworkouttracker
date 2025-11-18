@@ -436,11 +436,26 @@ function setupEventListeners() {
         input.classList.add('active');
         input.value = currentValue;
         
-        // Focus input
-        setTimeout(() => {
+        // Focus and show keyboard immediately
+        requestAnimationFrame(() => {
             input.focus();
-            input.select();
-        }, 10);
+            // For mobile, trigger click to bring up number pad
+            input.click();
+            // Select all text for easy replacement
+            input.setSelectionRange(0, input.value.length);
+        });
+    });
+    
+    // Also handle direct input clicks for mobile
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('workout-input')) {
+            const input = e.target;
+            requestAnimationFrame(() => {
+                input.focus();
+                input.click();
+                input.setSelectionRange(0, input.value.length);
+            });
+        }
     });
     
     // Handle input blur (when user finishes typing)
@@ -483,10 +498,14 @@ function setupEventListeners() {
         }
     }, { passive: false });
     
-    // Graph click to detail page (delegated)
+    // Header click to detail page (delegated)
     document.addEventListener('click', (e) => {
-        const graphContainer = e.target.closest('.day-graph-container');
-        if (graphContainer) {
+        const header = e.target.closest('.header');
+        if (header && document.getElementById('home-screen').classList.contains('active')) {
+            // Don't trigger if clicking on day name (which goes back to today)
+            if (e.target.closest('.day-name')) {
+                return;
+            }
             showScreen('detail-screen');
             updateDetailGraph();
             updateSummaryStats();
