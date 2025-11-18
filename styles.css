@@ -95,6 +95,7 @@ body {
     overscroll-behavior-y: none;
     flex: 1;
     min-height: 0;
+    max-height: 400px;
     overflow-y: auto;
 }
 
@@ -220,7 +221,10 @@ body {
     padding: 20px 0 0 0;
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
-    flex-shrink: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 .workout-card {
@@ -231,8 +235,8 @@ body {
     border-bottom: 1px solid #D3D3D3;
     cursor: pointer;
     position: relative;
-    min-height: 80px;
-    height: 80px;
+    flex: 1;
+    min-height: 0;
 }
 
 .workout-card:last-child {
