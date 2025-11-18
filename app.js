@@ -124,6 +124,7 @@ let currentDate = new Date();
 currentDate.setHours(0, 0, 0, 0);
 let currentDayIndex = 5; // Index in the carousel (5 = today, 4 = yesterday, etc.)
 const MAX_DAYS_BACK = 5;
+let confettiTriggered = {}; // Track which dates have triggered confetti
 
 // Ensure currentDate is within valid range (today or up to 5 days back)
 function ensureValidDate() {
@@ -795,6 +796,8 @@ function saveInputValue(input) {
     const exercise = input.dataset.exercise;
     const dateKey = input.dataset.dateKey;
     const value = parseFloat(input.value) || 0;
+    
+    // Save the data first
     const workoutData = getWorkoutData(dateKey) || {};
     workoutData[exercise] = value;
     saveWorkoutData(dateKey, workoutData);
@@ -816,13 +819,155 @@ function saveInputValue(input) {
     }
     valueDisplay.style.display = 'block';
     
-    // Reload day page data to update calories and graph
+    // Immediately calculate and update calories
+    updateDayCalories(dayPage, dateKey);
+    
+    // Reload day page data to update graph
     const date = new Date(dateKey + 'T00:00:00');
     loadDayPageData(dayPage, date);
     
     // Update detail graphs and stats
     updateDetailGraph();
     updateSummaryStats();
+}
+
+function updateDayCalories(dayPage, dateKey) {
+    // Get fresh data from localStorage
+    const workoutData = getWorkoutData(dateKey) || {};
+    const userData = getUserData();
+    
+    let totalCalories = 0;
+    let completedExercises = 0;
+    
+    // Calculate total calories for all exercises
+    Object.keys(EXERCISES).forEach(exerciseKey => {
+        const exercise = EXERCISES[exerciseKey];
+        const value = workoutData[exerciseKey] || 0;
+        
+        if (value > 0) {
+            completedExercises++;
+            if (exercise.isWalking) {
+                const calc = calculateWalkingCalories(userData.weightKg, value);
+                totalCalories += calc.adjusted_kcal;
+            } else {
+                const calc = calculateCalories(userData.weightKg, value, exercise.secPerRep, exercise.met);
+                totalCalories += calc.adjusted_kcal;
+            }
+        }
+    });
+    
+    // Update calories display immediately
+    const caloriesElement = dayPage.querySelector(`.day-calories[data-date-key="${dateKey}"]`);
+    if (caloriesElement) {
+        caloriesElement.textContent = `${Math.round(totalCalories)} cal`;
+    }
+    
+    // Check if all 5 exercises are completed and confetti hasn't been triggered for this date
+    if (completedExercises === 5 && !confettiTriggered[dateKey]) {
+        confettiTriggered[dateKey] = true;
+        triggerConfetti();
+    } else if (completedExercises < 5) {
+        // Reset confetti trigger if exercises are removed
+        confettiTriggered[dateKey] = false;
+    }
+}
+
+function triggerConfetti() {
+    // Create confetti canvas
+    const canvas = document.createElement('canvas');
+    canvas.id = 'confetti-canvas';
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.zIndex = '9999';
+    document.body.appendChild(canvas);
+    
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    const confetti = [];
+    const confettiCount = 100;
+    const gravity = 0.5;
+    const terminalVelocity = 5;
+    const drag = 0.075;
+    
+    const colors = [
+        { front: '#CD661D', back: '#8B4513' },
+        { front: '#FFD700', back: '#FFA500' },
+        { front: '#FF6B6B', back: '#FF4757' },
+        { front: '#4ECDC4', back: '#45B7B8' },
+        { front: '#95E1D3', back: '#6BC4A6' }
+    ];
+    
+    // Initialize confetti particles
+    for (let i = 0; i < confettiCount; i++) {
+        confetti.push({
+            color: colors[Math.floor(Math.random() * colors.length)],
+            dimensions: {
+                x: Math.random() * 10 + 5,
+                y: Math.random() * 10 + 5
+            },
+            position: {
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height - canvas.height
+            },
+            rotation: Math.random() * 360,
+            velocity: {
+                x: Math.random() * 50 - 25,
+                y: Math.random() * 50 + 50
+            }
+        });
+    }
+    
+    let animationId;
+    function update() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        confetti.forEach((confetto, index) => {
+            const width = confetto.dimensions.x * Math.cos(confetto.rotation);
+            const height = confetto.dimensions.x * Math.sin(confetto.rotation);
+            
+            ctx.save();
+            ctx.translate(confetto.position.x, confetto.position.y);
+            ctx.rotate(confetto.rotation);
+            
+            ctx.fillStyle = confetto.color.front;
+            ctx.fillRect(-width / 2, -height / 2, width, height);
+            
+            ctx.fillStyle = confetto.color.back;
+            ctx.fillRect(-width / 2, -height / 2, width, height * 0.1);
+            
+            ctx.restore();
+            
+            confetto.rotation += confetto.velocity.x * 0.01;
+            confetto.position.x += confetto.velocity.x;
+            confetto.position.y += confetto.velocity.y;
+            confetto.velocity.x *= (1 - drag);
+            confetto.velocity.y *= (1 - drag);
+            confetto.velocity.y += gravity;
+            
+            if (confetto.velocity.y > terminalVelocity) {
+                confetto.velocity.y = terminalVelocity;
+            }
+            
+            if (confetto.position.y > canvas.height) {
+                confetti.splice(index, 1);
+            }
+        });
+        
+        if (confetti.length > 0) {
+            animationId = requestAnimationFrame(update);
+        } else {
+            cancelAnimationFrame(animationId);
+            canvas.remove();
+        }
+    }
+    
+    update();
 }
 
 // updateHomeGraph is no longer needed - each day page has its own graph via updateDayGraph

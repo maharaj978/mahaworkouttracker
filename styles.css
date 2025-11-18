@@ -77,6 +77,8 @@ body {
     margin: 0 !important;
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
+    height: 100vh;
+    overflow: hidden;
 }
 
 #home-screen.active {
@@ -91,6 +93,9 @@ body {
     flex-direction: column;
     overscroll-behavior: none;
     overscroll-behavior-y: none;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
 }
 
 .header {
@@ -215,6 +220,7 @@ body {
     padding: 20px 0 0 0;
     padding-bottom: 0 !important;
     margin-bottom: 0 !important;
+    flex-shrink: 0;
 }
 
 .workout-card {
@@ -225,13 +231,13 @@ body {
     border-bottom: 1px solid #D3D3D3;
     cursor: pointer;
     position: relative;
-    min-height: 100px;
-    height: 100px;
+    min-height: 80px;
+    height: 80px;
 }
 
 .workout-card:last-child {
     margin-bottom: 0;
-    padding-bottom: 0;
+    padding-bottom: 20px;
     border-bottom: none;
 }
 
