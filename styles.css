@@ -241,7 +241,7 @@ body {
 
 .workout-card:last-child {
     margin-bottom: 0;
-    padding-bottom: 20px;
+    padding-bottom: 60px;
     border-bottom: none;
 }
 
